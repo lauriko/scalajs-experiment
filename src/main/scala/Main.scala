@@ -10,7 +10,7 @@ object Main extends App {
       |
       |object $className extends {
       |  def main(args: Array[String]): Unit = {
-      |    // arg(0) = "$key"
+      |    // args(0) = "$key"
       |    val name = g.selectDynamic(args(0))
       |    g.$storage = "Hello " + name + "!"
       |  }
@@ -30,7 +30,7 @@ object Main extends App {
   val engine: ScriptEngine = new ScriptEngineManager(null).getEngineByName("nashorn")
   val compilerEngine: ScriptEngine  with Compilable = engine match {
     case se: ScriptEngine with Compilable => se
-    case _ => throw new Exception("ScriptEngine not and compilable")
+    case _ => throw new Exception("ScriptEngine not compilable")
   }
 
   // bind parameters
