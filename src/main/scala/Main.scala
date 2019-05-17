@@ -9,7 +9,7 @@ object Main extends App {
       |import scala.scalajs.js.Dynamic.{ global => g }
       |
       |object $className extends {
-      |  def main(args: Array[String]): Unit = {
+      |  def $mainMethod(args: Array[String]): Unit = {
       |    // args(0) = "$key"
       |    val name = g.selectDynamic(args(0))
       |    g.$storage = "Hello " + name + "!"
@@ -28,24 +28,32 @@ object Main extends App {
    */
 
   val engine: ScriptEngine = new ScriptEngineManager(null).getEngineByName("nashorn")
-  val compilerEngine: ScriptEngine  with Compilable = engine match {
+  val compilerEngine: ScriptEngine with Compilable = engine match {
     case se: ScriptEngine with Compilable => se
     case _ => throw new Exception("ScriptEngine not compilable")
   }
 
-  // bind parameters
-  val bindings = new SimpleBindings()
-  compilerEngine.setBindings(bindings, ScriptContext.GLOBAL_SCOPE)
 
   val compiledScript = compilerEngine.compile(jsCode)
   println(code)
 
+
+  val bindings = compilerEngine.getBindings(ScriptContext.GLOBAL_SCOPE)
+  val getResult = {
+    val scope = compilerEngine.getBindings(ScriptContext.ENGINE_SCOPE)
+    scope.get(_)
+  }
+
   bindings.put(key, "World")
   compiledScript.eval
-  println(compilerEngine.getBindings(ScriptContext.ENGINE_SCOPE).get(storage))
+  println(getResult(storage))
 
   bindings.put(key, "Finland")
   compiledScript.eval
-  println(compilerEngine.getBindings(ScriptContext.ENGINE_SCOPE).get(storage))
+  println(getResult(storage))
+
+  bindings.put(key, "Italy")
+  compiledScript.eval
+  println(getResult(storage))
 
 }

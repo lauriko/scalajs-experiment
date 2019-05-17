@@ -22,33 +22,33 @@ object ScalaJSCompiler {
 
   def compile(code: String, className: String, mainMethod: String = "main", args: List[String] = Nil) : String = {
 
-    val file = makeFile(code.getBytes("UTF-8"))
+    val scalaJSFile = makeFile(code.getBytes("UTF-8"))
 
     val target = new VirtualDirectory("", None)
 
     val settings = new Settings()
+    //settings.processArgumentString("-Ydebug -Ypartial-unification -Ylog-classpath")
     settings.outputDirs.setSingleOutput(target)
     settings.embeddedDefaults(getClass.getClassLoader)
 
     val classPaths = settings.classpath.value.split(":")
     val scalaJSLibrary = classPaths.find(_.contains("scalajs-library")).get
 
-    val reporter = new ConsoleReporter(settings)
-    val compiler = new Global(settings, reporter) { g =>
+    val reporter = new ConsoleReporter(new Settings)
+    val compiler = new Global(settings, reporter) {
       override lazy val plugins: List[Plugin] = List(new org.scalajs.core.compiler.ScalaJSPlugin(this))
     }
 
     val run = new compiler.Run()
 
-    run.compileFiles(List(file))
+    run.compileFiles(List(scalaJSFile))
     //run.compileSources(List(file))
 
     val irCache = new IRFileCache().newCache
-
     val irContainers = IRFileCache.IRContainer.fromClasspath(Seq(new File(scalaJSLibrary)))
-    val sjsirFiles = irCache.cached(irContainers)
+    val linkerLibraries = irCache.cached(irContainers)
 
-    val things = for {
+    val sjsirFiles = for {
       x <- target.iterator.to[collection.immutable.Traversable]
       if x.name.endsWith(".sjsir")
     } yield {
@@ -59,7 +59,6 @@ object ScalaJSCompiler {
 
     val output = WritableMemVirtualJSFile("output.js")
 
-
     val linkerConfig = StandardLinker.Config() /*
       .withSemantics(Semantics.Defaults.optimized)
       .withClosureCompilerIfAvailable(true)
@@ -67,9 +66,10 @@ object ScalaJSCompiler {
 
     val mainModuleInitializer = ModuleInitializer.mainMethodWithArgs(className, mainMethod, args)
     val linker = StandardLinker(linkerConfig)
-    linker.link(sjsirFiles ++ things.toSeq, Seq(mainModuleInitializer), output, new ScalaConsoleLogger())
+    linker.link(linkerLibraries ++ sjsirFiles.toSeq, Seq(mainModuleInitializer), output, new ScalaConsoleLogger())
 
     output.content
+
   }
 
 }
