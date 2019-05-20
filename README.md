@@ -10,8 +10,10 @@ ScalaJSCompiler has one method called `compile` which takes the ScalaJS code as 
 Libraries are provided to the compiler via `scala.tools.nsc.Settings` class. Easiest way to add libraries was to use
 `Settings.embeddedDefaults` to export class paths from `ClassLoader`.
 ```Scala
+val target = new VirtualDirectory("", None)
 val settings = new Settings()
 settings.embeddedDefaults(getClass.getClassLoader)
+settings.outputDirs.setSingleOutput(target)
 val reporter = new ConsoleReporter(settings)
 val compiler = new Global(settings, reporter) {
   override lazy val plugins: List[Plugin] =
