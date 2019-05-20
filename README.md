@@ -12,6 +12,7 @@ Libraries are provided to the compiler via `scala.tools.nsc.Settings` class. Eas
 ```Scala
 val settings = new Settings()
 settings.embeddedDefaults(getClass.getClassLoader)
+val reporter = new ConsoleReporter(settings)
 val compiler = new Global(settings, reporter) {
   override lazy val plugins: List[Plugin] =
     List(new org.scalajs.core.compiler.ScalaJSPlugin(this))
@@ -26,10 +27,12 @@ run.compilerFiles(List(scalaJsFile))
 `StandarLinker` links the `.sjsir` files to JavaScript code. It can be configured to optimize the output to be smaller
 in size.
 
-The linker's `link` function requires the `.sjsir` files and `scalajs-library` in `Seq[VirtualScalaJSIRFile]`,
-`ModuleInitializer` to invoke the main function, `WritableVirtualJSFile` as output and `Logger`. Arguments for the main
-function are given in the `ModuleInitializer`.
+The linker's `link` function requires a `Seq[VirtualScalaJSIRFile]` containing the `.sjsir` files and `scalajs-library`,
+a `ModuleInitializer` to invoke the main function, a `WritableVirtualJSFile` as output and a `Logger`. Arguments for the
+main function of the ScalaJS script are given in the `ModuleInitializer`.
 ```Scala
+val classPaths = settings.classpath.value.split(":")
+val scalaJSLibrary = classPaths.find(_.contains("scalajs-library")).get
 val irCache = new IRFileCache().newCache
 val irContainers = IRFileCache.IRContainer.fromClasspath(
   Seq(new File(scalaJSLibrary)))

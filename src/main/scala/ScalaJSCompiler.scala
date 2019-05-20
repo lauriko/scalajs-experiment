@@ -34,7 +34,7 @@ object ScalaJSCompiler {
     val classPaths = settings.classpath.value.split(":")
     val scalaJSLibrary = classPaths.find(_.contains("scalajs-library")).get
 
-    val reporter = new ConsoleReporter(new Settings)
+    val reporter = new ConsoleReporter(settings)
     val compiler = new Global(settings, reporter) {
       override lazy val plugins: List[Plugin] = List(new org.scalajs.core.compiler.ScalaJSPlugin(this))
     }
