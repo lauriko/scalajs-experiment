@@ -97,5 +97,5 @@ bindings.put("param", "World")
 compiledScript.eval
 
 val scope = compilerEngine.getBindings(ScriptContext.ENGINE_SCOPE)
-val result = scope.get("result")
+val result = scope.get("result") // "Hello world!"
 ```
