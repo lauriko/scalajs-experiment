@@ -8,7 +8,7 @@ object Main extends App {
     s"""
       |import scala.scalajs.js.Dynamic.{ global => g }
       |
-      |object $className extends {
+      |object $className {
       |  def $mainMethod(args: Array[String]): Unit = {
       |    // args(0) = "$key"
       |    val name = g.selectDynamic(args(0))
